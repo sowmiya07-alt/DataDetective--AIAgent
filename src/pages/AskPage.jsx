@@ -10,13 +10,15 @@ import { useDataset } from '../context/DatasetContext';
 import { analysisService } from '../services/analysisService';
 import { formatNumber } from '../utils/formatters';
 
-const CHART_COLORS = ['#C05C3F', '#587A5F', '#4A6FA5', '#9A6E0A', '#7C5C7A', '#78716C'];
+const CHART_COLORS = ['#C05C3F', '#507558', '#3D6095', '#92650A', '#7A5476', '#78716C'];
 
 const TT = {
   contentStyle: {
-    background: '#fff', border: '1px solid #E5E2DC',
-    borderRadius: 7, fontSize: 12, color: '#1C1917',
+    background: '#fff',
+    border: '1px solid #E2DDD6',
+    borderRadius: 6, fontSize: 11, color: '#1C1917',
     boxShadow: '0 4px 8px rgba(28,25,23,0.07)',
+    padding: '6px 10px',
   },
 };
 
@@ -33,63 +35,67 @@ function ResultChart({ chart }) {
   if (!chart?.data?.length) return null;
 
   if (chart.type === 'pie') return (
-    <ResponsiveContainer width="100%" height={240}>
+    <ResponsiveContainer width="100%" height={230}>
       <PieChart>
-        <Pie data={chart.data} dataKey={chart.dataKeys?.[0]?.key || 'count'} nameKey="name"
-          cx="50%" cy="50%" outerRadius={92} innerRadius={42}>
+        <Pie
+          data={chart.data} dataKey={chart.dataKeys?.[0]?.key || 'count'} nameKey="name"
+          cx="50%" cy="50%" outerRadius={86} innerRadius={38}
+        >
           {chart.data.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
         </Pie>
         <Tooltip {...TT} />
-        <Legend iconSize={9} wrapperStyle={{ fontSize: 11, color: '#78716C' }} />
+        <Legend iconSize={8} wrapperStyle={{ fontSize: 11, color: '#78716C' }} />
       </PieChart>
     </ResponsiveContainer>
   );
 
   if (chart.type === 'area') return (
-    <ResponsiveContainer width="100%" height={220}>
+    <ResponsiveContainer width="100%" height={210}>
       <AreaChart data={chart.data}>
         <defs>
           <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor="#C05C3F" stopOpacity={0.12} />
+            <stop offset="0%"   stopColor="#C05C3F" stopOpacity={0.10} />
             <stop offset="100%" stopColor="#C05C3F" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#F0EDE8" />
-        <XAxis dataKey={chart.xKey} tick={{ fontSize: 10, fill: '#A8A29E' }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 10, fill: '#A8A29E' }} axisLine={false} tickLine={false} width={44} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E2" vertical={false} />
+        <XAxis dataKey={chart.xKey} tick={{ fontSize: 9, fill: '#A8A29E' }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 9, fill: '#A8A29E' }} axisLine={false} tickLine={false} width={40} />
         <Tooltip {...TT} />
         {chart.dataKeys?.map(dk => (
-          <Area key={dk.key} type="monotone" dataKey={dk.key} stroke={dk.color || '#C05C3F'} strokeWidth={1.5} fill="url(#ag)" dot={false} />
+          <Area key={dk.key} type="monotone" dataKey={dk.key} stroke={dk.color || '#C05C3F'}
+            strokeWidth={1.5} fill="url(#ag)" dot={false} />
         ))}
       </AreaChart>
     </ResponsiveContainer>
   );
 
   if (chart.type === 'line') return (
-    <ResponsiveContainer width="100%" height={220}>
+    <ResponsiveContainer width="100%" height={210}>
       <LineChart data={chart.data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#F0EDE8" />
-        <XAxis dataKey={chart.xKey} tick={{ fontSize: 10, fill: '#A8A29E' }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 10, fill: '#A8A29E' }} axisLine={false} tickLine={false} width={44} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E2" vertical={false} />
+        <XAxis dataKey={chart.xKey} tick={{ fontSize: 9, fill: '#A8A29E' }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 9, fill: '#A8A29E' }} axisLine={false} tickLine={false} width={40} />
         <Tooltip {...TT} />
         {chart.dataKeys?.map(dk => (
-          <Line key={dk.key} type="monotone" dataKey={dk.key} stroke={dk.color || '#4A6FA5'} strokeWidth={1.5} dot={false} />
+          <Line key={dk.key} type="monotone" dataKey={dk.key}
+            stroke={dk.color || '#3D6095'} strokeWidth={1.5} dot={false} />
         ))}
       </LineChart>
     </ResponsiveContainer>
   );
 
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={chart.data} barSize={20}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#F0EDE8" />
-        <XAxis dataKey={chart.xKey} tick={{ fontSize: 10, fill: '#A8A29E' }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 10, fill: '#A8A29E' }} axisLine={false} tickLine={false} width={44} />
+    <ResponsiveContainer width="100%" height={210}>
+      <BarChart data={chart.data} barSize={18}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#EDE9E2" vertical={false} />
+        <XAxis dataKey={chart.xKey} tick={{ fontSize: 9, fill: '#A8A29E' }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 9, fill: '#A8A29E' }} axisLine={false} tickLine={false} width={40} />
         <Tooltip {...TT} />
         {(chart.dataKeys || [{ key: chart.yKey, color: '#C05C3F' }]).map(dk => (
-          <Bar key={dk.key} dataKey={dk.key} fill={dk.color || '#C05C3F'} radius={[3, 3, 0, 0]} name={dk.label} />
+          <Bar key={dk.key} dataKey={dk.key} fill={dk.color || '#C05C3F'} radius={[2, 2, 0, 0]} name={dk.label} />
         ))}
-        {chart.dataKeys?.length > 1 && <Legend iconSize={9} wrapperStyle={{ fontSize: 11 }} />}
+        {chart.dataKeys?.length > 1 && <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />}
       </BarChart>
     </ResponsiveContainer>
   );
@@ -100,7 +106,7 @@ function Narrative({ text }) {
   if (!text) return null;
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return (
-    <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--text-secondary)', whiteSpace: 'pre-line' }}>
+    <p style={{ fontSize: 13, lineHeight: 1.75, color: 'var(--text-secondary)', whiteSpace: 'pre-line' }}>
       {parts.map((p, i) =>
         p.startsWith('**') && p.endsWith('**')
           ? <strong key={i} style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{p.slice(2, -2)}</strong>
@@ -118,7 +124,7 @@ export default function AskPage() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
-  const [active,  setActive]  = useState(null); // index of selected result
+  const [active,  setActive]  = useState(null);
 
   const inputRef  = useRef(null);
   const canvasRef = useRef(null);
@@ -153,52 +159,73 @@ export default function AskPage() {
   const activeResult = active !== null ? results[active] : null;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 0, height: 'calc(100vh - var(--topbar-height) - 64px)', maxHeight: 'calc(100vh - 120px)' }}>
-
-      {/* ═══════════════════ LEFT — Conversation Panel ═══════════════════ */}
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: '296px 1fr',
+      gap: 0,
+      height: 'calc(100vh - var(--topbar-height) - 56px)',
+      maxHeight: 'calc(100vh - 108px)',
+    }}>
+      {/* ═══════════════ LEFT — Conversation Panel ═══════════════ */}
       <div style={{
         display: 'flex', flexDirection: 'column',
         borderRight: '1px solid var(--border-default)',
         height: '100%', overflow: 'hidden',
+        background: 'var(--bg-surface)',
       }}>
-        {/* Header */}
-        <div style={{ padding: '0 0 16px', flexShrink: 0 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-faint)', marginBottom: 4 }}>
-            Dataset
+        {/* Dataset context header */}
+        <div style={{
+          padding: '14px 16px 12px',
+          borderBottom: '1px solid var(--border-subtle)',
+          flexShrink: 0,
+        }}>
+          <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-faint)', marginBottom: 4 }}>
+            Active Dataset
           </p>
           <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {activeDataset?.name || 'No dataset selected'}
           </p>
           {activeDataset && (
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+            <p style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2, fontFeatureSettings: '"tnum"' }}>
               {formatNumber(activeDataset.rowCount)} rows · {activeDataset.columnCount} columns
+              {activeDataset.isDemo && <span style={{ color: 'var(--warning)', marginLeft: 6 }}>Demo</span>}
             </p>
           )}
         </div>
 
-        <div style={{ height: 1, background: 'var(--border-subtle)', marginBottom: 16, flexShrink: 0 }} />
-
         {/* Conversation thread */}
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4, paddingRight: 16 }}>
+        <div style={{
+          flex: 1, overflowY: 'auto',
+          padding: '10px 12px',
+          display: 'flex', flexDirection: 'column', gap: 3,
+        }}>
           {results.length === 0 && !loading && (
-            <div style={{ paddingTop: 8 }}>
-              <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-faint)', marginBottom: 10 }}>
+            <div style={{ paddingTop: 4 }}>
+              <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-faint)', marginBottom: 8 }}>
                 Try asking
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {SUGGESTED.map((q, i) => (
-                  <button key={i} onClick={() => handleAsk(q)}
+                  <button
+                    key={i}
+                    onClick={() => handleAsk(q)}
                     style={{
                       textAlign: 'left', padding: '8px 10px',
                       borderRadius: 'var(--radius-sm)',
                       fontSize: 12, color: 'var(--text-secondary)',
                       border: '1px solid var(--border-default)',
-                      background: 'var(--bg-surface)',
-                      lineHeight: 1.4, cursor: 'pointer',
+                      background: 'var(--bg-app)',
+                      lineHeight: 1.45, cursor: 'pointer',
                       transition: 'all var(--transition-fast)',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-primary)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = 'var(--accent-primary)';
+                      e.currentTarget.style.color = 'var(--text-primary)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = 'var(--border-default)';
+                      e.currentTarget.style.color = 'var(--text-secondary)';
+                    }}
                   >
                     {q}
                   </button>
@@ -212,26 +239,40 @@ export default function AskPage() {
               key={i}
               onClick={() => setActive(i)}
               style={{
-                textAlign: 'left', padding: '10px 10px',
+                textAlign: 'left', padding: '9px 10px',
                 borderRadius: 'var(--radius-sm)',
                 background: active === i ? 'var(--accent-subtle)' : 'transparent',
                 border: `1px solid ${active === i ? 'var(--accent-border)' : 'transparent'}`,
                 cursor: 'pointer', transition: 'all var(--transition-fast)',
               }}
             >
-              <p style={{ fontSize: 12, fontWeight: 500, color: active === i ? 'var(--accent-text)' : 'var(--text-primary)', lineHeight: 1.4, marginBottom: 3 }}>
+              <p style={{
+                fontSize: 12, fontWeight: 500,
+                color: active === i ? 'var(--accent-text)' : 'var(--text-primary)',
+                lineHeight: 1.4, marginBottom: 3,
+                overflow: 'hidden', textOverflow: 'ellipsis',
+                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              }}>
                 {question}
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>{result.queryType}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>{result.executionTimeMs}ms</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 9, color: 'var(--text-faint)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {result.queryType}
+                </span>
+                <span style={{ fontSize: 9, color: 'var(--text-faint)' }}>·</span>
+                <span style={{ fontSize: 9, color: 'var(--text-faint)', fontFeatureSettings: '"tnum"' }}>
+                  {result.executionTimeMs}ms
+                </span>
               </div>
             </button>
           ))}
 
           {loading && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 10px', color: 'var(--text-muted)' }}>
-              <Loader size={13} style={{ animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '9px 10px', color: 'var(--text-muted)',
+            }}>
+              <Loader size={12} style={{ animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
               <span style={{ fontSize: 12 }}>Analyzing…</span>
             </div>
           )}
@@ -239,20 +280,34 @@ export default function AskPage() {
 
         {/* Error */}
         {error && (
-          <div style={{ padding: '10px 12px', background: 'var(--danger-subtle)', border: '1px solid var(--danger-border)', borderRadius: 'var(--radius-sm)', display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 8, marginRight: 16, flexShrink: 0 }}>
-            <AlertCircle size={13} style={{ color: 'var(--danger)', marginTop: 1, flexShrink: 0 }} />
-            <span style={{ fontSize: 12, color: 'var(--danger-text)', lineHeight: 1.4 }}>{error}</span>
+          <div style={{
+            margin: '0 12px 8px', padding: '9px 11px',
+            background: 'var(--danger-subtle)',
+            border: '1px solid var(--danger-border)',
+            borderRadius: 'var(--radius-sm)',
+            display: 'flex', gap: 7, alignItems: 'flex-start',
+            flexShrink: 0,
+          }}>
+            <AlertCircle size={12} style={{ color: 'var(--danger)', marginTop: 1, flexShrink: 0 }} />
+            <span style={{ fontSize: 11, color: 'var(--danger-text)', lineHeight: 1.45 }}>{error}</span>
           </div>
         )}
 
         {/* Input */}
-        <div style={{ paddingRight: 16, paddingTop: 12, flexShrink: 0 }}>
-          <div style={{
-            border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)',
-            background: 'var(--bg-surface)', padding: '8px 10px',
-            display: 'flex', alignItems: 'flex-end', gap: 8,
-            transition: 'border-color var(--transition-fast)',
-          }}
+        <div style={{
+          padding: '10px 12px 12px',
+          flexShrink: 0,
+          borderTop: '1px solid var(--border-subtle)',
+        }}>
+          <div
+            style={{
+              border: '1px solid var(--border-default)',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--bg-app)',
+              padding: '8px 10px',
+              display: 'flex', alignItems: 'flex-end', gap: 7,
+              transition: 'border-color var(--transition-fast)',
+            }}
             onFocusCapture={e => e.currentTarget.style.borderColor = 'var(--accent-primary)'}
             onBlurCapture={e => e.currentTarget.style.borderColor = 'var(--border-default)'}
           >
@@ -277,110 +332,172 @@ export default function AskPage() {
               id="ask-submit-btn"
               style={{ flexShrink: 0, alignSelf: 'flex-end' }}
             >
-              <Send size={13} />
+              <Send size={12} />
             </button>
           </div>
-          <p style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 5 }}>Enter to submit · Shift+Enter for newline</p>
+          <p style={{ fontSize: 10, color: 'var(--text-faint)', marginTop: 4 }}>
+            Enter to submit · Shift+Enter for newline
+          </p>
         </div>
       </div>
 
-      {/* ═══════════════════ RIGHT — Analytics Canvas ═══════════════════ */}
-      <div ref={canvasRef} style={{ overflowY: 'auto', paddingLeft: 32, paddingRight: 0 }}>
+      {/* ═══════════════ RIGHT — Analytics Canvas ═══════════════ */}
+      <div
+        ref={canvasRef}
+        style={{
+          overflowY: 'auto',
+          padding: '24px 28px',
+          background: 'var(--bg-app)',
+        }}
+      >
         {!activeResult ? (
           <div style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            height: '100%', minHeight: 400, gap: 16, textAlign: 'center', color: 'var(--text-muted)',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            height: '100%', minHeight: 360,
+            gap: 14, textAlign: 'center',
           }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'var(--bg-inset)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Database size={22} style={{ color: 'var(--text-faint)' }} />
+            <div style={{
+              width: 44, height: 44, borderRadius: 10,
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-default)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Database size={18} style={{ color: 'var(--text-faint)' }} />
             </div>
             <div>
-              <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>Analysis canvas</p>
-              <p style={{ fontSize: 13, maxWidth: 320, lineHeight: 1.6 }}>Ask a question in the panel on the left and your results will appear here.</p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 5 }}>
+                Analysis canvas
+              </p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 280, lineHeight: 1.65 }}>
+                Ask a question in the panel on the left. Results, charts, and data tables will appear here.
+              </p>
             </div>
           </div>
         ) : (
-          <div style={{ animation: 'fadeUp 0.2s ease' }}>
-            {/* Question + meta */}
-            <div style={{ marginBottom: 24 }}>
-              <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-faint)', marginBottom: 6 }}>Question</p>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.015em', lineHeight: 1.3, marginBottom: 10 }}>
+          <div style={{ animation: 'fadeUp 0.18s ease', maxWidth: 760 }}>
+
+            {/* ── Question heading ── */}
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-faint)', marginBottom: 6 }}>
+                Question
+              </p>
+              <h2 style={{
+                fontSize: 18, fontWeight: 700, color: 'var(--text-primary)',
+                letterSpacing: '-0.018em', lineHeight: 1.3, marginBottom: 10,
+              }}>
                 {activeResult.question}
               </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span className="badge badge-primary">{activeResult.result.queryType}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-faint)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Clock size={10} /> {activeResult.result.executionTimeMs}ms
+                <span style={{ fontSize: 10, color: 'var(--text-faint)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <Clock size={9} /> {activeResult.result.executionTimeMs}ms
                 </span>
-                <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
+                <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>
                   {activeResult.result.sourceSummary?.mode}
                 </span>
                 {activeResult.result.sourceSummary?.mode?.includes('Client') && (
-                  <span className="badge badge-warning" style={{ fontSize: 10 }}>Demo analysis</span>
+                  <span className="badge badge-warning">Demo analysis</span>
                 )}
               </div>
             </div>
 
-            <div style={{ height: 1, background: 'var(--border-subtle)', marginBottom: 24 }} />
+            <div style={{ height: 1, background: 'var(--border-subtle)', marginBottom: 22 }} />
 
-            {/* KPIs */}
+            {/* ── KPIs — presented as a horizontal strip, not stat cards ── */}
             {activeResult.result.kpis?.length > 0 && (
-              <div style={{ marginBottom: 28 }}>
-                <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-faint)', marginBottom: 12 }}>Key Metrics</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: 10 }}>
+              <div style={{ marginBottom: 24 }}>
+                <p className="section-label">Key Metrics</p>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: `repeat(${Math.min(activeResult.result.kpis.length, 4)}, 1fr)`,
+                  gap: 10,
+                }}>
                   {activeResult.result.kpis.map((kpi, i) => (
                     <div key={i} style={{
                       padding: '12px 14px',
                       background: 'var(--bg-surface)',
-                      border: `1px solid ${kpi.status === 'success' ? 'var(--sage-border)' : kpi.status === 'warning' ? 'var(--warning-border)' : kpi.status === 'danger' ? 'var(--danger-border)' : 'var(--border-default)'}`,
+                      border: `1px solid ${
+                        kpi.status === 'success' ? 'var(--sage-border)'
+                        : kpi.status === 'warning' ? 'var(--warning-border)'
+                        : kpi.status === 'danger' ? 'var(--danger-border)'
+                        : 'var(--border-default)'
+                      }`,
                       borderRadius: 'var(--radius-md)',
                     }}>
-                      <p style={{ fontSize: 11, color: 'var(--text-faint)', marginBottom: 5, lineHeight: 1.2 }}>{kpi.label}</p>
-                      <p style={{ fontSize: 19, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1 }}>{kpi.value}</p>
+                      <p style={{ fontSize: 10, color: 'var(--text-faint)', marginBottom: 4, lineHeight: 1.3 }}>
+                        {kpi.label}
+                      </p>
+                      <p style={{
+                        fontSize: 17, fontWeight: 700,
+                        color: 'var(--text-primary)',
+                        letterSpacing: '-0.02em', lineHeight: 1,
+                        fontFeatureSettings: '"tnum"',
+                      }}>
+                        {kpi.value}
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Narrative */}
+            {/* ── Narrative — primary analytical content ── */}
             {activeResult.result.narrative && (
-              <div style={{ marginBottom: 28 }}>
-                <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-faint)', marginBottom: 12 }}>Analysis</p>
-                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)', padding: '16px 18px' }}>
+              <div style={{ marginBottom: 24 }}>
+                <p className="section-label">Analysis</p>
+                <div style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-default)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '16px 18px',
+                  borderLeft: '3px solid var(--accent-primary)',
+                }}>
                   <Narrative text={activeResult.result.narrative} />
                 </div>
               </div>
             )}
 
-            {/* Chart */}
+            {/* ── Chart ── */}
             {activeResult.result.chart && (
-              <div style={{ marginBottom: 28 }}>
-                <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-faint)', marginBottom: 12 }}>{activeResult.result.chart.title}</p>
-                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-lg)', padding: '16px 16px 12px' }}>
+              <div style={{ marginBottom: 24 }}>
+                <p className="section-label">{activeResult.result.chart.title}</p>
+                <div style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-default)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '14px 14px 10px',
+                }}>
                   <ResultChart chart={activeResult.result.chart} />
                 </div>
               </div>
             )}
 
-            {/* Data preview */}
+            {/* ── Data table ── */}
             {activeResult.result.tableData?.length > 0 && (
-              <div style={{ marginBottom: 28 }}>
-                <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-faint)', marginBottom: 12 }}>
-                  Data Preview — {Math.min(activeResult.result.tableData.length, 8)} rows
-                </p>
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <p className="section-label" style={{ marginBottom: 0 }}>Data Preview</p>
+                  <span style={{ fontSize: 10, color: 'var(--text-faint)' }}>
+                    {Math.min(activeResult.result.tableData.length, 8)} of {activeResult.result.tableData.length} rows
+                  </span>
+                </div>
                 <div className="table-container">
                   <table className="custom-table">
                     <thead>
                       <tr>
-                        {Object.keys(activeResult.result.tableData[0] || {}).slice(0, 7).map(k => <th key={k}>{k}</th>)}
+                        {Object.keys(activeResult.result.tableData[0] || {}).slice(0, 7).map(k => (
+                          <th key={k}>{k}</th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
                       {activeResult.result.tableData.slice(0, 8).map((row, ri) => (
                         <tr key={ri}>
                           {Object.values(row).slice(0, 7).map((v, ci) => (
-                            <td key={ci}>{typeof v === 'number' ? formatNumber(v) : String(v ?? '—')}</td>
+                            <td key={ci} style={{ fontFeatureSettings: typeof v === 'number' ? '"tnum"' : 'normal' }}>
+                              {typeof v === 'number' ? formatNumber(v) : String(v ?? '—')}
+                            </td>
                           ))}
                         </tr>
                       ))}
@@ -390,25 +507,36 @@ export default function AskPage() {
               </div>
             )}
 
-            {/* Follow-ups */}
+            {/* ── Follow-up questions ── */}
             {activeResult.result.followUps?.length > 0 && (
               <div>
-                <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-faint)', marginBottom: 10 }}>Follow-up Questions</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <p className="section-label">Follow-up Questions</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {activeResult.result.followUps.map((fq, i) => (
-                    <button key={i} onClick={() => handleAsk(fq)} style={{
-                      textAlign: 'left', padding: '9px 12px',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--border-default)',
-                      background: 'var(--bg-surface)',
-                      fontSize: 13, color: 'var(--text-secondary)',
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      cursor: 'pointer', transition: 'all var(--transition-fast)',
-                    }}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-border)'; e.currentTarget.style.background = 'var(--accent-subtle)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.background = 'var(--bg-surface)'; }}
+                    <button
+                      key={i}
+                      onClick={() => handleAsk(fq)}
+                      style={{
+                        textAlign: 'left', padding: '9px 12px',
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--border-default)',
+                        background: 'var(--bg-surface)',
+                        fontSize: 12, color: 'var(--text-secondary)',
+                        display: 'flex', alignItems: 'center', gap: 7,
+                        cursor: 'pointer', transition: 'all var(--transition-fast)',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.borderColor = 'var(--accent-border)';
+                        e.currentTarget.style.background = 'var(--accent-subtle)';
+                        e.currentTarget.style.color = 'var(--accent-text)';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.borderColor = 'var(--border-default)';
+                        e.currentTarget.style.background = 'var(--bg-surface)';
+                        e.currentTarget.style.color = 'var(--text-secondary)';
+                      }}
                     >
-                      <ChevronRight size={13} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+                      <ChevronRight size={12} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
                       {fq}
                     </button>
                   ))}
@@ -421,7 +549,7 @@ export default function AskPage() {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeUp { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+        @keyframes fadeUp { from { opacity:0; transform: translateY(5px); } to { opacity:1; transform:none; } }
       `}</style>
     </div>
   );

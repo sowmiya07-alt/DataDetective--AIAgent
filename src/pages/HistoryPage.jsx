@@ -1,59 +1,64 @@
 import React, { useState } from 'react';
 import {
-  History, Trash2, Clock, Database, Zap, Search,
-  Filter, ChevronRight, AlertCircle, Download
+  Trash2, Clock, Database, Zap, Search,
+  Filter, ChevronRight, AlertCircle, Download, History
 } from 'lucide-react';
 import { useDataset } from '../context/DatasetContext';
 import { useNavigate } from 'react-router-dom';
 
-const TYPE_COLORS = {
-  'Data Quality & Outliers': { bg: 'var(--warning-subtle)', color: 'var(--warning-text)', border: 'var(--warning-border)' },
-  'Categorical Benchmarking': { bg: 'var(--accent-subtle)', color: 'var(--accent-primary)', border: 'var(--accent-border)' },
-  'Temporal Trend Analysis': { bg: 'var(--info-subtle)', color: 'var(--info-text)', border: 'var(--info-border)' },
-  'Exploratory Pattern Discovery': { bg: 'var(--success-subtle)', color: 'var(--success-text)', border: 'var(--success-border)' },
+const TYPE_META = {
+  'Data Quality & Outliers':       { cls: 'badge-warning',  label: 'Quality' },
+  'Categorical Benchmarking':      { cls: 'badge-primary',  label: 'Categorical' },
+  'Temporal Trend Analysis':       { cls: 'badge-info',     label: 'Temporal' },
+  'Exploratory Pattern Discovery': { cls: 'badge-success',  label: 'Exploratory' },
 };
 
 function HistoryRow({ item, onReplay }) {
-  const colors = TYPE_COLORS[item.queryType] || TYPE_COLORS['Exploratory Pattern Discovery'];
+  const meta = TYPE_META[item.queryType] || { cls: 'badge-default', label: item.queryType || 'Analysis' };
   const ts = item.timestamp ? new Date(item.timestamp).toLocaleString() : '—';
+
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 16, padding: '14px 20px',
-      borderBottom: '1px solid var(--border-subtle)',
-      transition: 'background 0.15s'
-    }}
-      className="history-row"
+    <div
+      style={{
+        display: 'flex', alignItems: 'center', gap: 14,
+        padding: '12px 18px',
+        borderBottom: '1px solid var(--border-subtle)',
+        transition: 'background var(--transition-fast)',
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
     >
+      {/* Question */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <p style={{
+          fontWeight: 500, fontSize: 13, marginBottom: 4,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          color: 'var(--text-primary)',
+        }}>
           {item.question}
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-          <span style={{
-            fontSize: '0.7rem', fontWeight: 600, padding: '2px 8px', borderRadius: 20,
-            background: colors.bg, color: colors.color, border: `1px solid ${colors.border}`
-          }}>
-            {item.queryType || 'Analysis'}
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+          <span className={`badge ${meta.cls}`}>{meta.label}</span>
+          <span style={{ fontSize: 11, color: 'var(--text-faint)', display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Database size={10} /> {item.datasetName || '—'}
           </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Database size={11} /> {item.datasetName || '—'}
-          </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Clock size={11} /> {ts}
+          <span style={{ fontSize: 11, color: 'var(--text-faint)', display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Clock size={10} /> {ts}
           </span>
           {item.executionTimeMs && (
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <Zap size={11} /> {item.executionTimeMs}ms
+            <span style={{ fontSize: 11, color: 'var(--text-faint)', display: 'flex', alignItems: 'center', gap: 3, fontFeatureSettings: '"tnum"' }}>
+              <Zap size={10} /> {item.executionTimeMs}ms
             </span>
           )}
         </div>
       </div>
+
       <button
         className="btn btn-secondary btn-sm"
         onClick={() => onReplay(item.question)}
         title="Re-run this query"
       >
-        <ChevronRight size={14} /> Replay
+        Replay <ChevronRight size={12} />
       </button>
     </div>
   );
@@ -62,13 +67,15 @@ function HistoryRow({ item, onReplay }) {
 export default function HistoryPage() {
   const { history, clearHistory } = useDataset();
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
+  const [search, setSearch]         = useState('');
   const [filterType, setFilterType] = useState('All');
 
   const queryTypes = ['All', ...Array.from(new Set(history.map(h => h.queryType).filter(Boolean)))];
 
   const filtered = history.filter(h => {
-    const matchSearch = !search || h.question?.toLowerCase().includes(search.toLowerCase()) || h.datasetName?.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !search
+      || h.question?.toLowerCase().includes(search.toLowerCase())
+      || h.datasetName?.toLowerCase().includes(search.toLowerCase());
     const matchType = filterType === 'All' || h.queryType === filterType;
     return matchSearch && matchType;
   });
@@ -84,57 +91,103 @@ export default function HistoryPage() {
       QueryType: h.queryType,
       ExecutionMs: h.executionTimeMs,
       Timestamp: h.timestamp,
-      Mode: h.mode
+      Mode: h.mode,
     }));
-    const csv = [Object.keys(rows[0]).join(','), ...rows.map(r => Object.values(r).map(v => `"${v}"`).join(','))].join('\n');
+    const csv = [
+      Object.keys(rows[0]).join(','),
+      ...rows.map(r => Object.values(r).map(v => `"${v}"`).join(',')),
+    ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
     a.href = url; a.download = 'DataDetective_History.csv'; a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
     <div>
-      <div className="page-header" style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      {/* ── Header ── */}
+      <div className="page-header" style={{
+        display: 'flex', flexDirection: 'row',
+        alignItems: 'flex-start', justifyContent: 'space-between',
+      }}>
         <div>
-          <h1 className="page-title">Audit Log & Analysis History</h1>
-          <p className="page-description">Full chronological record of all AI queries and analysis sessions.</p>
+          <h1 className="page-title">Analysis History</h1>
+          <p className="page-subtitle">
+            Chronological record of all queries
+            {history.length > 0 && ` · ${history.length} total`}
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {history.length > 0 && (
-            <>
-              <button className="btn btn-secondary" onClick={handleExport} id="export-history-btn">
-                <Download size={15} /> Export
-              </button>
-              <button className="btn btn-danger btn-sm" onClick={clearHistory} id="clear-history-btn">
-                <Trash2 size={14} /> Clear All
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Stats Bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 24 }}>
-        {[
-          { label: 'Total Queries', value: history.length, color: '#4f46e5' },
-          { label: 'Unique Datasets', value: new Set(history.map(h => h.datasetName)).size, color: '#06b6d4' },
-          { label: 'Avg Response Time', value: history.length ? `${Math.round(history.reduce((a, h) => a + (h.executionTimeMs || 0), 0) / history.length)}ms` : '—', color: '#10b981' },
-          { label: 'Query Types', value: queryTypes.length - 1, color: '#f59e0b' }
-        ].map((s, i) => (
-          <div key={i} className="card" style={{ padding: '16px 20px' }}>
-            <p style={{ fontSize: '1.75rem', fontWeight: 700, color: s.color }}>{s.value}</p>
-            <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</p>
+        {history.length > 0 && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-secondary" onClick={handleExport} id="export-history-btn">
+              <Download size={13} /> Export
+            </button>
+            <button className="btn btn-danger btn-sm" onClick={clearHistory} id="clear-history-btn">
+              <Trash2 size={12} /> Clear All
+            </button>
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Filters */}
+      {/* ── Summary strip (only if there's history) ── */}
+      {history.length > 0 && (
+        <div style={{
+          display: 'flex', gap: 0, marginBottom: 20,
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          borderRadius: 'var(--radius-lg)', overflow: 'hidden',
+        }}>
+          {[
+            {
+              label: 'Total Queries',
+              value: history.length,
+            },
+            {
+              label: 'Unique Datasets',
+              value: new Set(history.map(h => h.datasetName)).size,
+            },
+            {
+              label: 'Avg Response',
+              value: history.length
+                ? `${Math.round(history.reduce((a, h) => a + (h.executionTimeMs || 0), 0) / history.length)}ms`
+                : '—',
+            },
+            {
+              label: 'Query Types',
+              value: queryTypes.length - 1,
+            },
+          ].map((s, i, arr) => (
+            <div
+              key={i}
+              style={{
+                flex: 1, padding: '12px 16px',
+                borderRight: i < arr.length - 1 ? '1px solid var(--border-subtle)' : 'none',
+              }}
+            >
+              <p style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-faint)', marginBottom: 3 }}>
+                {s.label}
+              </p>
+              <p style={{
+                fontSize: 16, fontWeight: 700, color: 'var(--text-primary)',
+                letterSpacing: '-0.02em', fontFeatureSettings: '"tnum"',
+              }}>
+                {s.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Filter bar + history list ── */}
       <div className="card">
-        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{
+          padding: '12px 16px',
+          borderBottom: '1px solid var(--border-subtle)',
+          display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap',
+        }}>
           <div className="search-input-wrapper" style={{ flex: 1, minWidth: 200 }}>
-            <Search size={14} />
+            <Search size={13} />
             <input
               type="text"
               className="input-field"
@@ -142,32 +195,48 @@ export default function HistoryPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               id="history-search"
-              style={{ paddingLeft: 36 }}
+              style={{ paddingLeft: 30 }}
             />
           </div>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <Filter size={14} style={{ color: 'var(--text-muted)' }} />
-            {queryTypes.map(t => (
-              <button
-                key={t}
-                className={`btn btn-sm ${filterType === t ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => setFilterType(t)}
-                style={{ fontSize: '0.75rem' }}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
+          {queryTypes.length > 1 && (
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Filter size={12} style={{ color: 'var(--text-faint)' }} />
+              {queryTypes.map(t => (
+                <button
+                  key={t}
+                  className={`btn btn-xs ${filterType === t ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setFilterType(t)}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* History List */}
+        {/* History list */}
         {filtered.length === 0 ? (
-          <div style={{ padding: '60px 24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <AlertCircle size={40} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-            <p style={{ fontWeight: 600 }}>No history found</p>
-            <p style={{ fontSize: '0.875rem', marginTop: 4 }}>Start asking questions on the "Ask Your Data" page</p>
-            <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={() => navigate('/ask')}>
-              Go Ask Your Data <ChevronRight size={14} />
+          <div style={{ padding: '56px 24px', textAlign: 'center' }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: 9, background: 'var(--bg-inset)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 12px',
+            }}>
+              <History size={18} style={{ color: 'var(--text-faint)' }} />
+            </div>
+            <p style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)', marginBottom: 4 }}>
+              {search || filterType !== 'All' ? 'No matching queries' : 'No history yet'}
+            </p>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
+              {search || filterType !== 'All'
+                ? 'Try adjusting your search or filter.'
+                : 'Start asking questions on the Ask AI page.'}
+            </p>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => navigate('/ask')}
+            >
+              Go to Ask AI <ChevronRight size={12} />
             </button>
           </div>
         ) : (
@@ -179,13 +248,16 @@ export default function HistoryPage() {
         )}
 
         {filtered.length > 0 && (
-          <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border-subtle)', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+          <div style={{
+            padding: '10px 18px',
+            borderTop: '1px solid var(--border-subtle)',
+            fontSize: 11, color: 'var(--text-faint)',
+            fontFeatureSettings: '"tnum"',
+          }}>
             Showing {filtered.length} of {history.length} records
           </div>
         )}
       </div>
-
-      <style>{`.history-row:hover { background: var(--bg-subtle); }`}</style>
     </div>
   );
 }
